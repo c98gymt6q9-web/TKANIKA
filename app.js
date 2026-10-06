@@ -27,11 +27,11 @@
   })();
   aiReady.then(() => { if (!(view.tab === "coll" && view.sub)) render(); });
   function aiErr(e) {
-    const m = { not_granted: "Доступ к AI для этой страницы не разрешён.", sampling_disabled: "AI недоступен для этого аккаунта.", rate_limited: "Слишком много запросов — попробуйте через минуту.", session_expired: "Сессия истекла — войдите в Claude заново.", image_rejected: "Файл не подошёл: нужен JPEG, PNG, WebP или GIF до 20 МБ.", images_unavailable: "В этом окне AI не принимает изображения.", refused: "AI не стал отвечать на этот запрос — переформулируйте его.", invalid_json: "AI ответил в неожиданном формате — нажмите ещё раз.", prompt_too_large: "Слишком длинный текст — сократите ответ." };
+    const m = { not_granted: "Доступ к AI для этой страницы не разрешён.", sampling_disabled: "AI недоступен для этого аккаунта.", rate_limited: "Слишком много запросов — попробуйте через минуту.", session_expired: "Сессия истекла — войдите в Claude заново.", image_rejected: "Файл не подошёл: нужен JPEG, PNG, WebP или GIF до 20 МБ.", images_unavailable: "В этом окне AI не принимает изображения.", refused: "AI не стал отвечать на этот запрос — переформулируйте его.", invalid_json: "AI ответил в неожиданном формате — нажмите ещё раз.", prompt_too_large: "Слишком длинный текст — сократите ответ.", bad_key: "Ключ API не подошёл — проверьте его в настройках AI.", network: "Нет связи с AI — проверьте интернет.", api_error: "Сервис AI вернул ошибку — попробуйте ещё раз." };
     return m[e && e.code] || "Не удалось получить ответ AI. Попробуйте ещё раз.";
   }
   const thinking = (t = "AI рассматривает препарат…") => `<div class="thinking"><span class="dot3"><i></i><i></i><i></i></span>${esc(t)}</div>`;
-  const noAI = `<div class="note" style="padding:12px 14px;border-radius:10px;background:var(--warn-soft);color:var(--warn)">AI-функции работают, когда страница открыта в Claude. Атлас, база знаний и тесты доступны всегда.</div>`;
+  const noAI = `<div class="note" style="padding:12px 14px;border-radius:10px;background:var(--warn-soft);color:var(--warn)">AI-функции работают внутри Claude или в любом браузере с вашим ключом Anthropic API. Атлас, база знаний и тесты доступны всегда.${window.TKAI ? ` <button class="btn sm" style="margin-top:8px" onclick="TKAI.open()">${'Подключить AI'}</button>` : ""}</div>`;
 
   /* ---------- иконки ---------- */
   const I = {
@@ -93,7 +93,7 @@
     app.innerHTML = `
       <div class="page-h">
         <div><div class="eyebrow">Атлас препаратов</div><h1>${TK.preps.length} препаратов общей гистологии</h1>
-        <p>Поле зрения каждого препарата с подписями структур, двумя увеличениями и режимом самопроверки. Открой препарат и найди на нём всё, что спросят на зачёте.</p></div>
+        <p>Реальные микрофото и схемы полей зрения с подписями структур, двумя увеличениями и режимом самопроверки. Открой препарат и найди на нём всё, что спросят на зачёте.</p></div>
       </div>
       <div class="chips" role="group" aria-label="Раздел" style="margin-bottom:18px">
         <button class="chip" data-f="all" aria-pressed="${atlasFilter === "all"}">Все</button>
@@ -103,7 +103,7 @@
         ${secs.map((s) => `<div class="sec-h"><h2>${s.name}</h2><span class="note mono">${TK.preps.filter((p) => p.sec === s.id).length} преп.</span></div>` +
           TK.preps.filter((p) => p.sec === s.id).map((p) => `
           <button class="card slide-card" data-p="${p.id}">
-            <canvas class="field" data-id="${p.id}" aria-hidden="true"></canvas>
+            ${TK.photos[p.id] ? `<img class="field" loading="lazy" decoding="async" src="${TK.photoUrl(TK.photos[p.id][0], 330)}" alt="" data-fb="${p.id}">` : `<canvas class="field" data-id="${p.id}" aria-hidden="true"></canvas>`}
             <h3>${esc(p.title)}</h3>
             <div class="meta"><span class="pill eo">${esc(p.stain.split(" (")[0].split("+")[0].trim())}</span>${P.seen[p.id] ? '<span class="pill good">изучен</span>' : ""}</div>
           </button>`).join("")).join("")}
@@ -111,25 +111,43 @@
     $$("[data-f]", app).forEach((b) => (b.onclick = () => { atlasFilter = b.dataset.f; render(); }));
     $$("[data-p]", app).forEach((b) => (b.onclick = () => go("atlas", b.dataset.p)));
     $$("canvas.field", app).forEach((cv) => paint(cv, cv.dataset.id, 220));
+    $$("img[data-fb]", app).forEach((im) => (im.onerror = () => { const cv = h(`<canvas class="field" aria-hidden="true"></canvas>`); im.replaceWith(cv); paint(cv, im.dataset.fb, 220); }));
+  }
+
+  /* масштаб и перетаскивание реального снимка в окуляре */
+  function photoPan(wrap, img, zoom) {
+    let x = 0, y = 0, sx = 0, sy = 0, drag = false;
+    const lim = () => { const w = wrap.clientWidth * (zoom - 1) / 2; x = Math.max(-w, Math.min(w, x)); y = Math.max(-w, Math.min(w, y)); };
+    const apply = () => { lim(); img.style.transform = `translate(${x}px,${y}px) scale(${zoom})`; };
+    apply();
+    if (zoom <= 1) return;
+    wrap.style.cursor = "grab"; wrap.style.touchAction = "none";
+    wrap.onpointerdown = (e) => { drag = true; sx = e.clientX - x; sy = e.clientY - y; wrap.setPointerCapture(e.pointerId); wrap.style.cursor = "grabbing"; };
+    wrap.onpointermove = (e) => { if (!drag) return; x = e.clientX - sx; y = e.clientY - sy; apply(); };
+    wrap.onpointerup = wrap.onpointercancel = () => { drag = false; wrap.style.cursor = "grab"; };
   }
 
   const artFor = (p) => ({ bone: "bone-art", adipose: "special-ct" })[p.id] || ({ epi: "epi-class", blood: "blood-art", ct: "loose", skel: "cartilage", musc: "muscle-art", nerv: "nerve-art" })[p.sec];
 
-  let det = { zoom: 1, mode: "show", revealed: {} };
+  let det = { zoom: 1, mode: "show", revealed: {}, src: "photo", pi: 0 };
   function detailView(app, id) {
     const p = prepById(id); if (!p) return go("atlas");
     P.seen[id] = 1; P.last = { tab: "atlas", sub: id }; save();
+    const photos = TK.photos[id] || [], usePhoto = det.src === "photo" && photos.length > 0, pi = Math.min(det.pi, photos.length - 1);
     app.innerHTML = `
       <button class="back" id="back">${I.back} Все препараты</button>
       <div class="detail">
         <div class="scope">
-          <div class="eyepiece" id="eye"><canvas id="cv" role="img" aria-label="Поле зрения: ${esc(p.title)}"></canvas></div>
+          <div class="eyepiece" id="eye">${usePhoto ? `<div class="photo-pan" id="pan"><img id="ph" src="${TK.photoUrl(photos[pi], 960)}" alt="Микрофото: ${esc(p.title)}" draggable="false"></div>` : `<canvas id="cv" role="img" aria-label="Поле зрения: ${esc(p.title)}"></canvas>`}</div>
+          ${photos.length ? `<div class="scope-bar"><div class="seg" role="group" aria-label="Источник"><button data-src="photo" aria-pressed="${usePhoto}">Фото</button><button data-src="scheme" aria-pressed="${!usePhoto}">Схема</button></div>
+            ${usePhoto && photos.length > 1 ? `<div class="seg" role="group" aria-label="Снимок">${photos.map((_, i) => `<button data-pi="${i}" aria-pressed="${i === pi}">Снимок ${i + 1}</button>`).join("")}</div>` : ""}</div>` : ""}
+          ${usePhoto ? `<p class="note credit">Фото: <a href="${photos[pi].page}" target="_blank" rel="noopener">${esc(photos[pi].by || "Wikimedia Commons")}</a> · ${esc(photos[pi].lic)} · ${det.zoom > 1 ? "перетаскивай снимок" : "Wikimedia Commons"}</p>` : ""}
           <div class="scope-bar">
             <div class="seg" role="group" aria-label="Увеличение">
               <button data-z="1" aria-pressed="${det.zoom === 1}">Малое</button><button data-z="2.5" aria-pressed="${det.zoom === 2.5}">Большое</button>
             </div>
             <div class="seg" role="group" aria-label="Подписи">
-              <button data-m="show" aria-pressed="${det.mode === "show"}">Подписи</button><button data-m="quiz" aria-pressed="${det.mode === "quiz"}">Самопроверка</button><button data-m="none" aria-pressed="${det.mode === "none"}">Без меток</button>
+              <button data-m="show" aria-pressed="${det.mode === "show"}">Подписи</button><button data-m="quiz" aria-pressed="${det.mode === "quiz"}">Самопроверка</button>${usePhoto ? "" : `<button data-m="none" aria-pressed="${det.mode === "none"}">Без меток</button>`}
             </div>
           </div>
         </div>
@@ -144,7 +162,7 @@
           <h3>Не перепутать</h3>
           <div class="diff">${p.diff.map(([a, b]) => `<div><b>${esc(a)}:</b> ${esc(b)}</div>`).join("")}</div>
           <div class="row" style="margin-top:22px">
-            <a class="btn sm" href="${p.commons}" target="_blank" rel="noopener">${I.ext} Реальные фото в Commons</a>
+            <a class="btn sm" href="${p.commons}" target="_blank" rel="noopener">${I.ext} Ещё фото в Commons</a>
             <button class="btn sm" id="toArt">${I.kb} Теория</button>
           </div>
           <div class="ask" id="askBox"></div>
@@ -154,15 +172,19 @@
     $("#toArt").onclick = () => { kbState.id = artFor(p); go("kb"); };
     $$("[data-z]", app).forEach((b) => (b.onclick = () => { det.zoom = +b.dataset.z; det.revealed = {}; detailView(app, id); }));
     $$("[data-m]", app).forEach((b) => (b.onclick = () => { det.mode = b.dataset.m; det.revealed = {}; detailView(app, id); }));
-    const eye = $("#eye"), cv = $("#cv");
+    $$("[data-src]", app).forEach((b) => (b.onclick = () => { det.src = b.dataset.src; det.revealed = {}; detailView(app, id); }));
+    $$("[data-pi]", app).forEach((b) => (b.onclick = () => { det.pi = +b.dataset.pi; detailView(app, id); }));
+    const eye = $("#eye");
     const size = Math.min(560, eye.clientWidth || 340);
+    let cv = $("#cv");
+    if (usePhoto) { cv = document.createElement("canvas"); photoPan($("#pan"), $("#ph"), det.zoom); $("#ph").onerror = () => { det.src = "scheme"; detailView(app, id); }; }
     const labels = Slides.render(id, cv, { size, zoom: det.zoom });
     const lg = $("#legend");
-    $("#lgNote").textContent = det.mode === "quiz" ? "· нажми на пункт, чтобы открыть" : "";
+    $("#lgNote").textContent = usePhoto ? (det.mode === "quiz" ? "· найди на фото, потом открой" : "· найди их на снимке") : det.mode === "quiz" ? "· нажми на пункт, чтобы открыть" : "";
     labels.forEach((l, i) => {
       const li = h(`<li data-i="${i}"><span class="n">${i + 1}</span><span class="t ${det.mode === "quiz" && !det.revealed[i] ? "masked" : ""}">${esc(l.t)}</span></li>`);
       lg.appendChild(li);
-      if (det.mode !== "none") {
+      if (det.mode !== "none" && !usePhoto) {
         const pin = h(`<button class="pin ${det.mode === "quiz" ? "q" : ""}" style="left:${(l.px * 100).toFixed(2)}%;top:${(l.py * 100).toFixed(2)}%" aria-label="Структура ${i + 1}">${i + 1}</button>`);
         eye.appendChild(pin);
         const on = (v) => { pin.classList.toggle("on", v); li.classList.toggle("on", v); };
@@ -245,9 +267,16 @@
     $("#go").onclick = () => identify(app);
     const demos = $("#demos");
     shuffle(TK.preps).slice(0, 8).forEach((p) => {
-      const b = h(`<button aria-label="Пример препарата"><canvas></canvas></button>`); demos.appendChild(b);
-      paint($("canvas", b), p.id, 64);
-      b.onclick = () => {
+      const ph = (TK.photos[p.id] || [])[0];
+      const b = h(`<button aria-label="Пример препарата">${ph ? `<img src="${TK.photoUrl(ph, 120)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">` : "<canvas></canvas>"}</button>`); demos.appendChild(b);
+      if (!ph) paint($("canvas", b), p.id, 64);
+      b.onclick = async () => {
+        if (ph) {
+          try {
+            const blob = await (await fetch(TK.photoUrl(ph, 960))).blob();
+            AI.file = blob; AI.url = URL.createObjectURL(blob); AI.demo = p.id; AI.result = null; AI.err = ""; AI.stain = ""; aiView(app); return;
+          } catch (e) { /* без сети — берём схему */ }
+        }
         const cv = document.createElement("canvas"); const seed = (Math.random() * 1e9) | 0;
         Slides.render(p.id, cv, { size: 560, seed, zoom: Math.random() < 0.5 ? 1 : 1.8 });
         cv.toBlob((blob) => { AI.file = blob; AI.url = cv.toDataURL("image/png"); AI.demo = p.id; AI.result = null; AI.err = ""; AI.stain = ""; aiView(app); }, "image/png");
@@ -531,7 +560,8 @@ ${list}
     return shuffle(TK.preps).slice(0, 10).map((p) => {
       const same = shuffle(TK.preps.filter((x) => x.id !== p.id && x.sec === p.sec)), other = shuffle(TK.preps.filter((x) => x.id !== p.id && x.sec !== p.sec));
       const opts = shuffle([p, ...same.slice(0, 2), ...other].slice(0, 4));
-      return { id: p.id, opts: opts.map((o) => o.id), seed: (Math.random() * 1e9) | 0, zoom: Math.random() < 0.6 ? 1 : 1.8 };
+      const ph = TK.photos[p.id] || [];
+      return { id: p.id, opts: opts.map((o) => o.id), seed: (Math.random() * 1e9) | 0, zoom: Math.random() < 0.6 ? 1 : 1.8, photo: ph.length && Math.random() < 0.65 ? (Math.random() * ph.length) | 0 : -1 };
     });
   }
   function prepQuizView(app, s) {
@@ -544,11 +574,13 @@ ${list}
     const it = s.items[s.i], truth = prepById(it.id);
     app.innerHTML = `<div class="flash">${backToColl()}
       <div class="progress-line"><span>Зачёт по препаратам</span><span>${s.i + 1} / 10 · верно ${s.score}</span></div>
-      <div class="card qcard"><div class="quiz-field eyepiece" style="max-width:340px"><canvas id="qcv" role="img" aria-label="Препарат для определения"></canvas></div>
+      <div class="card qcard"><div class="quiz-field eyepiece" style="max-width:340px">${it.photo >= 0 ? `<div class="photo-pan"><img id="qph" src="${TK.photoUrl(TK.photos[it.id][it.photo], 500)}" alt="Препарат для определения"></div>` : `<canvas id="qcv" role="img" aria-label="Препарат для определения"></canvas>`}</div>
+      <p class="note" style="text-align:center;margin:-6px 0 0">${it.photo >= 0 ? "Реальный снимок" : "Схема поля зрения"}</p>
       <p class="q" style="text-align:center">Какой это препарат?</p>
       <div class="opts">${it.opts.map((id, i) => `<button class="opt" data-o="${id}"><span class="k">${"АБВГ"[i]}</span><span>${esc(prepById(id).title)}</span></button>`).join("")}</div><div id="fb"></div></div></div>`;
     bindBack(app);
-    Slides.render(it.id, $("#qcv"), { size: Math.min(340, $("#qcv").parentElement.clientWidth || 300), seed: it.seed, zoom: it.zoom });
+    if ($("#qcv")) Slides.render(it.id, $("#qcv"), { size: Math.min(340, $("#qcv").parentElement.clientWidth || 300), seed: it.seed, zoom: it.zoom });
+    else $("#qph").onerror = () => { it.photo = -1; prepQuizView(app, s); };
     $$("[data-o]", app).forEach((b) => (b.onclick = () => {
       $$("[data-o]", app).forEach((x) => { x.disabled = true; if (x.dataset.o === it.id) x.classList.add("ok"); });
       if (b.dataset.o === it.id) s.score++; else b.classList.add("no");

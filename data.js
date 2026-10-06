@@ -331,3 +331,268 @@ TK.blocks = {
   nerv: { def: "Ткань из нейронов и нейроглии, воспринимающая, проводящая и передающая возбуждение.", feat: "Нейроны не делятся, имеют отростки, тельца Ниссля и нейрофибриллы; глия обеспечивает опору, трофику, миелин.", cls: "Нейроны: по отросткам и функции. Глия: макроглия (эпендима, астроциты, олигодендроциты) и микроглия.", fn: "Восприятие раздражений, проведение импульса, интеграция и регуляция работы организма." },
 };
 TK.mainArticle = { epi: "epi-general", blood: "blood-art", ct: "loose", skel: "cartilage", musc: "muscle-art", nerv: "nerve-art" };
+
+/* Реальные микрофото с Wikimedia Commons (в основном CC0, Berkshire Community College Bioscience Image Library). {w} — ширина превью. */
+TK.photos = {
+ "mesothelium": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/Epithelial_Tissues_Simple_Squamous_Epithelium_%28frog%29_%2827847646938%29.jpg/960px-Epithelial_Tissues_Simple_Squamous_Epithelium_%28frog%29_%2827847646938%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Epithelial_Tissues_Simple_Squamous_Epithelium_(frog)_(27847646938).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Epithelial_Tissues_Simple_Squamous_Epithelium_%2841722161301%29.jpg/960px-Epithelial_Tissues_Simple_Squamous_Epithelium_%2841722161301%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Epithelial_Tissues_Simple_Squamous_Epithelium_(41722161301).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  }
+ ],
+ "kidney": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Epithelial_Tissues_Simple_Cuboidal_Epithelium_%2841681552432%29.jpg/960px-Epithelial_Tissues_Simple_Cuboidal_Epithelium_%2841681552432%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Epithelial_Tissues_Simple_Cuboidal_Epithelium_(41681552432).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Epithelial_Tissues_Simple_Cuboidal_Epithelium_%2841681552782%29.jpg/960px-Epithelial_Tissues_Simple_Cuboidal_Epithelium_%2841681552782%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Epithelial_Tissues_Simple_Cuboidal_Epithelium_(41681552782).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  }
+ ],
+ "intestine": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/Epithelial_Tissues_Simple_Columnar_Epithelium_%2841723124791%29.jpg/960px-Epithelial_Tissues_Simple_Columnar_Epithelium_%2841723124791%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Epithelial_Tissues_Simple_Columnar_Epithelium_(41723124791).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Epithelial_Tissues_Simple_Columnar_Epithelium_%2827854453338%29.jpg/960px-Epithelial_Tissues_Simple_Columnar_Epithelium_%2827854453338%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Epithelial_Tissues_Simple_Columnar_Epithelium_(27854453338).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  }
+ ],
+ "trachea": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/32/Epithelial_Tissues_Pseudostratified_Columnar_Epithelium_%2841783111911%29.jpg/960px-Epithelial_Tissues_Pseudostratified_Columnar_Epithelium_%2841783111911%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Epithelial_Tissues_Pseudostratified_Columnar_Epithelium_(41783111911).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7b/Epithelial_Tissues_Pseudostratified_Columnar_Epithelium_%2826915090687%29.jpg/960px-Epithelial_Tissues_Pseudostratified_Columnar_Epithelium_%2826915090687%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Epithelial_Tissues_Pseudostratified_Columnar_Epithelium_(26915090687).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  }
+ ],
+ "squamousNK": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/Epithelial_Tissues_Stratified_Squamous_Epithelium_%2841994232802%29.jpg/960px-Epithelial_Tissues_Stratified_Squamous_Epithelium_%2841994232802%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Epithelial_Tissues_Stratified_Squamous_Epithelium_(41994232802).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/be/Epithelial_Tissues_Stratified_Squamous_Epithelium_%2840230842160%29.jpg/960px-Epithelial_Tissues_Stratified_Squamous_Epithelium_%2840230842160%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Epithelial_Tissues_Stratified_Squamous_Epithelium_(40230842160).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  }
+ ],
+ "squamousK": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/19/Thick_Skin_Histological_Section_%28epidermis%2C_dermis_and_hypodermis%29.jpg/960px-Thick_Skin_Histological_Section_%28epidermis%2C_dermis_and_hypodermis%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Thick_Skin_Histological_Section_(epidermis,_dermis_and_hypodermis).jpg",
+   "lic": "CC BY-SA 3.0",
+   "by": "Iceclanl"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Thick_skin.jpg/960px-Thick_skin.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Thick_skin.jpg",
+   "lic": "CC BY-SA 4.0",
+   "by": "SGnanadeep"
+  }
+ ],
+ "transitional": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Epithelial_Tissues_Transitional_%2827025223777%29.jpg/960px-Epithelial_Tissues_Transitional_%2827025223777%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Epithelial_Tissues_Transitional_(27025223777).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Epithelial_Tissues_Transitional_%2827025225007%29.jpg/960px-Epithelial_Tissues_Transitional_%2827025225007%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Epithelial_Tissues_Transitional_(27025225007).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  }
+ ],
+ "blood": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Connective_Tissue_Human_Blood_Leukocyte_Survey_%2839982279720%29.jpg/960px-Connective_Tissue_Human_Blood_Leukocyte_Survey_%2839982279720%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Connective_Tissue_Human_Blood_Leukocyte_Survey_(39982279720).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Connective_Tissue_Human_Blood_%2839982278130%29.jpg/960px-Connective_Tissue_Human_Blood_%2839982278130%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Connective_Tissue_Human_Blood_(39982278130).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  }
+ ],
+ "looseCT": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/81/Areolar2.jpg/960px-Areolar2.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Areolar2.jpg",
+   "lic": "CC BY-SA 4.0",
+   "by": "Echinaceapallida"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Areolar1.jpg/960px-Areolar1.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Areolar1.jpg",
+   "lic": "CC BY-SA 4.0",
+   "by": "Echinaceapallida"
+  }
+ ],
+ "tendon": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Dense_regular1.jpg/960px-Dense_regular1.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Dense_regular1.jpg",
+   "lic": "CC BY-SA 4.0",
+   "by": "Echinaceapallida"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Dense_regular4.jpg/960px-Dense_regular4.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Dense_regular4.jpg",
+   "lic": "CC BY-SA 4.0",
+   "by": "Echinaceapallida"
+  }
+ ],
+ "adipose": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Connective_Tissue_Adipose_%2841066514324%29.jpg/960px-Connective_Tissue_Adipose_%2841066514324%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Connective_Tissue_Adipose_(41066514324).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Connective_Tissue_Adipose_%2841066513194%29_%28cropped%29.jpg/960px-Connective_Tissue_Adipose_%2841066513194%29_%28cropped%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Connective_Tissue_Adipose_(41066513194)_(cropped).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  }
+ ],
+ "hyaline": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d3/Connective_Tissue_Hyaline_Cartilage_%2840958873155%29.jpg/960px-Connective_Tissue_Hyaline_Cartilage_%2840958873155%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Connective_Tissue_Hyaline_Cartilage_(40958873155).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/Connective_Tissue_Hyaline_Cartilage_%2826989336477%29.jpg/960px-Connective_Tissue_Hyaline_Cartilage_%2826989336477%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Connective_Tissue_Hyaline_Cartilage_(26989336477).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  }
+ ],
+ "elastic": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4e/Connective_Tissue_Elastic_Cartilage_%2841855666711%29.jpg/960px-Connective_Tissue_Elastic_Cartilage_%2841855666711%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Connective_Tissue_Elastic_Cartilage_(41855666711).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fa/Connective_Tissue_Elastic_Cartilage_%2841855667991%29.jpg/960px-Connective_Tissue_Elastic_Cartilage_%2841855667991%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Connective_Tissue_Elastic_Cartilage_(41855667991).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  }
+ ],
+ "bone": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1f/Connective_Tissue_Compact_Bone_%2841068142774%29.jpg/960px-Connective_Tissue_Compact_Bone_%2841068142774%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Connective_Tissue_Compact_Bone_(41068142774).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Connective_Tissue_Compact_Bone_%2841068143724%29.jpg/960px-Connective_Tissue_Compact_Bone_%2841068143724%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Connective_Tissue_Compact_Bone_(41068143724).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  }
+ ],
+ "skeletal": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/Muscle_Tissue_Skeletal_Muscle_Fibers_%2840153601630%29.jpg/960px-Muscle_Tissue_Skeletal_Muscle_Fibers_%2840153601630%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Muscle_Tissue_Skeletal_Muscle_Fibers_(40153601630).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Muscle_Tissue_Skeletal_Muscle_Fibers_%2828089114338%29.jpg/960px-Muscle_Tissue_Skeletal_Muscle_Fibers_%2828089114338%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Muscle_Tissue_Skeletal_Muscle_Fibers_(28089114338).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  }
+ ],
+ "smooth": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/Muscle_Tissue_Smooth_%2840087100490%29.jpg/960px-Muscle_Tissue_Smooth_%2840087100490%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Muscle_Tissue_Smooth_(40087100490).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/54/Muscle_Tissue_Smooth_%2840087099220%29.jpg/960px-Muscle_Tissue_Smooth_%2840087099220%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Muscle_Tissue_Smooth_(40087099220).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  }
+ ],
+ "cardiac": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Muscle_Tissue_Cardiac_Muscle_%2827187637567%29.jpg/960px-Muscle_Tissue_Cardiac_Muscle_%2827187637567%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Muscle_Tissue_Cardiac_Muscle_(27187637567).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dd/Muscle_Tissue_Cardiac_Muscle_%2827187637147%29.jpg/960px-Muscle_Tissue_Cardiac_Muscle_%2827187637147%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Muscle_Tissue_Cardiac_Muscle_(27187637147).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  }
+ ],
+ "neurons": [
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Nervous_Tissue_Spinal_Cord_Motor_Neuron_%2841850850692%29.jpg/960px-Nervous_Tissue_Spinal_Cord_Motor_Neuron_%2841850850692%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Nervous_Tissue_Spinal_Cord_Motor_Neuron_(41850850692).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  },
+  {
+   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/Nervous_Tissue_Spinal_Cord_Motor_Neuron_%2841850850452%29.jpg/960px-Nervous_Tissue_Spinal_Cord_Motor_Neuron_%2841850850452%29.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Nervous_Tissue_Spinal_Cord_Motor_Neuron_(41850850452).jpg",
+   "lic": "CC0",
+   "by": "Berkshire Community College  Bioscience Image Library"
+  }
+ ],
+ "nerve": [
+  {
+   "src": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Peripheral_nerve%2C_cross_section.jpg",
+   "page": "https://commons.wikimedia.org/wiki/File:Peripheral_nerve,_cross_section.jpg",
+   "lic": "CC BY-SA 3.0",
+   "by": ""
+  }
+ ]
+};
+TK.photoUrl = (ph, w) => ph.src.replace("{w}", w);

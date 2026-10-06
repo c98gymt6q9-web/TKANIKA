@@ -1,6 +1,17 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Тканика</title>
+<meta name="description" content="Тканика — атлас и тренажёр по общей гистологии: препараты с подписями, реальные микрофото, теория и тесты.">
+<meta name="theme-color" content="#FFF5F9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#231320" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Тканика">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
@@ -249,6 +260,18 @@ textarea.input{min-height:110px;resize:vertical;line-height:1.5}
 .fcard.back{background:var(--hem-soft)}
 .md p{margin:0 0 10px}.md ul{margin:0 0 10px;padding-left:20px}
 footer{padding-block:30px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);margin-top:20px}
+
+/* реальные микрофото */
+.slide-card img.field{object-fit:cover}
+.photo-pan{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:#2a1622;-webkit-mask-image:-webkit-radial-gradient(white,black)}
+.photo-pan img{width:100%;height:100%;object-fit:cover;display:block;transform-origin:center;transition:transform .3s cubic-bezier(.2,.8,.2,1);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.credit{text-align:center;margin:10px 0 0;font-size:12px}
+.credit a{color:var(--muted)}
+#demos img{pointer-events:none}
+html{-webkit-text-size-adjust:100%}
+body{overscroll-behavior-y:none}
+button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+@media(hover:none){input,select,textarea,.input{font-size:16px}} /* Safari на iPhone не зумит поле при фокусе */
 </style>
 
 </head><body><header class="top">
@@ -264,8 +287,9 @@ footer{padding-block:30px;color:var(--muted);font-size:12.5px;border-top:1px sol
 <nav class="tabbar" id="tabbar"></nav>
 
 <main class="wrap" id="app"></main>
-<footer class="wrap">Тканика · учебный проект по общей гистологии. Поля препаратов в атласе — схемы, нарисованные программно в цветах реальных окрасок; ссылки «Фото в Commons» ведут на реальные микрофотографии под свободными лицензиями. AI-ответы проверяйте по учебнику.</footer>
+<footer class="wrap">Тканика · учебный проект по общей гистологии. Реальные микрофото — Wikimedia Commons (в основном CC0, Berkshire Community College Bioscience Image Library; автор и лицензия подписаны под каждым снимком). Схемы полей нарисованы программно в цветах реальных окрасок. AI-ответы проверяйте по учебнику.</footer>
 
+<script src="ai-browser.js"></script>
 <script src="data.js"></script>
 <script src="slides.js"></script>
 <script src="app.js"></script>
