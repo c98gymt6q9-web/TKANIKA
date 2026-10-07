@@ -2,8 +2,8 @@
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Тканика</title>
 <meta name="description" content="Тканика — атлас и тренажёр по общей гистологии: препараты с подписями, реальные микрофото, теория и тесты.">
-<meta name="theme-color" content="#FFF5F9" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#231320" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F6F1EA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F0B12" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -13,29 +13,30 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
 :root{
-  --bg:#FFF5F9; --surface:#FFFFFF; --surface2:#FBE7F2; --ink:#2B2B2B; --muted:#7A5A70; --line:#F2D2E4;
-  --hem:#C44AA6; --hem-ink:#FFFFFF; --hem-soft:#F8D7EB; --eo:#8B2E6B; --eo-soft:#FBE3F2; --acc:#E08AC9;
-  --good:#23845A; --good-soft:#DDF1E7; --warn:#A8690F; --warn-soft:#F8EBD4; --bad:#BE3246; --bad-soft:#F8DDE1;
-  --shadow:0 1px 2px rgba(139,46,107,.06),0 10px 26px -12px rgba(139,46,107,.25);
-  --display:"Unbounded","Arial Black",system-ui,sans-serif; --body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
-  --r:18px;
+  --bg:#F6F1EA; --surface:#FFFDF9; --surface2:#EFE7DC; --ink:#1B1420; --muted:#6E6370; --line:#E4DACD;
+  --hem:#B8325E; --hem-ink:#FFFFFF; --hem-soft:#F5DDE3; --eo:#2C1E4A; --eo-soft:#E8E2F1; --acc:#E7A0B6;
+  --good:#1F7A55; --good-soft:#DCEFE4; --warn:#9A5B0C; --warn-soft:#F5E8D2; --bad:#B42A3F; --bad-soft:#F6DCDF;
+  --shadow:0 1px 1px rgba(27,20,32,.04),0 12px 32px -16px rgba(44,30,74,.28);
+  --display:"Playfair Display",Georgia,"Times New Roman",serif; --body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --r:22px; --lens:#141016;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   color-scheme:dark;
-  --bg:#231320; --surface:#301a2b; --surface2:#43223A; --ink:#FBEAF4; --muted:#D3A9C5; --line:#4F2A46;
-  --hem:#E08AC9; --hem-ink:#2A1622; --hem-soft:#4A2340; --eo:#F3C6E6; --eo-soft:#4A2340; --acc:#E08AC9;
-  --good:#5CCB94; --good-soft:#1B3A2C; --warn:#E6B45F; --warn-soft:#3E2E16; --bad:#F2798A; --bad-soft:#44202A;
-  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+  --bg:#0F0B12; --surface:#18121C; --surface2:#221A28; --ink:#F4EEF5; --muted:#A496A8; --line:#2F2635;
+  --hem:#F07AA0; --hem-ink:#1A0F14; --hem-soft:#3A1E2A; --eo:#D6C9F7; --eo-soft:#2A2140; --acc:#F07AA0;
+  --good:#5CCB94; --good-soft:#15301F; --warn:#E6B45F; --warn-soft:#33260F; --bad:#F2798A; --bad-soft:#3B1A22;
+  --shadow:0 1px 1px rgba(0,0,0,.5),0 14px 34px -16px rgba(0,0,0,.8); --lens:#000;
 }}
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --bg:#231320; --surface:#301a2b; --surface2:#43223A; --ink:#FBEAF4; --muted:#D3A9C5; --line:#4F2A46;
-  --hem:#E08AC9; --hem-ink:#2A1622; --hem-soft:#4A2340; --eo:#F3C6E6; --eo-soft:#4A2340; --acc:#E08AC9;
-  --good:#5CCB94; --good-soft:#1B3A2C; --warn:#E6B45F; --warn-soft:#3E2E16; --bad:#F2798A; --bad-soft:#44202A;
-  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+  --bg:#0F0B12; --surface:#18121C; --surface2:#221A28; --ink:#F4EEF5; --muted:#A496A8; --line:#2F2635;
+  --hem:#F07AA0; --hem-ink:#1A0F14; --hem-soft:#3A1E2A; --eo:#D6C9F7; --eo-soft:#2A2140; --acc:#F07AA0;
+  --good:#5CCB94; --good-soft:#15301F; --warn:#E6B45F; --warn-soft:#33260F; --bad:#F2798A; --bad-soft:#3B1A22;
+  --shadow:0 1px 1px rgba(0,0,0,.5),0 14px 34px -16px rgba(0,0,0,.8); --lens:#000;
 }
 *{box-sizing:border-box}
 body{margin:0}img{max-width:100%}[hidden]{display:none!important}
@@ -272,6 +273,158 @@ html{-webkit-text-size-adjust:100%}
 body{overscroll-behavior-y:none}
 button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 @media(hover:none){input,select,textarea,.input{font-size:16px}} /* Safari на iPhone не зумит поле при фокусе */
+
+/* ===== редизайн: «препаратная» ===== */
+body{font-size:15.5px;background:var(--bg);background-image:radial-gradient(1200px 500px at 100% -10%,color-mix(in srgb,var(--hem-soft) 70%,transparent),transparent 70%),radial-gradient(900px 500px at -10% 0%,color-mix(in srgb,var(--eo-soft) 80%,transparent),transparent 65%);background-attachment:fixed}
+::selection{background:var(--hem);color:var(--hem-ink)}
+h1,h2,h3{font-family:var(--display)}
+em{font-style:italic}
+.top{background:color-mix(in srgb,var(--bg) 78%,transparent);border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);backdrop-filter:saturate(1.6) blur(18px);-webkit-backdrop-filter:saturate(1.6) blur(18px)}
+.top .wrap{height:60px}
+.brand svg{width:28px;height:28px}
+.brand b{font:600 22px/1 var(--display);letter-spacing:-.01em;color:var(--ink)}
+.brand b i{color:var(--hem);font-style:normal}
+.brand small{font:500 9.5px/1.2 var(--mono);letter-spacing:.14em;margin-top:4px}
+.nav button{font-size:14px;font-weight:500;border-radius:999px;padding:8px 14px}
+.nav button:hover{background:color-mix(in srgb,var(--surface2) 70%,transparent)}
+.nav button[aria-current="page"]{background:var(--ink);color:var(--bg)}
+.theme-btn{border-radius:999px;background:transparent}
+.eyebrow{font:500 10.5px/1.2 var(--mono);letter-spacing:.16em;color:var(--hem);display:inline-flex;align-items:center;gap:8px}
+.eyebrow::before{content:"";width:18px;height:1px;background:currentColor;opacity:.7}
+.page-h{padding-block:34px 20px}
+.page-h h1{font:600 clamp(30px,6vw,52px)/1.02 var(--display);letter-spacing:-.025em;color:var(--ink);max-width:16ch;margin-top:12px}
+.page-h h1 em{color:var(--hem);font-weight:500}
+.page-h p{font-size:15.5px;line-height:1.6;max-width:58ch}
+.card{border:1px solid color-mix(in srgb,var(--line) 75%,transparent);box-shadow:var(--shadow)}
+.btn{border-radius:999px;padding:11px 20px;font-weight:600;border-color:var(--line);background:var(--surface)}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.btn.primary:hover{filter:none;background:var(--hem);border-color:var(--hem);color:var(--hem-ink)}
+.btn.sm{border-radius:999px}
+.chip{background:transparent;border-color:var(--line);font-weight:500;color:var(--ink);padding:8px 14px;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding-inline:16px;scroll-padding-inline:16px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 24px),transparent)}
+.chips.scroll::-webkit-scrollbar{display:none}
+.pill{border-radius:999px;font-weight:500}
+.pill.no-pill{background:var(--ink);color:var(--bg)}
+.seg{background:color-mix(in srgb,var(--surface2) 85%,transparent);border-radius:999px;padding:4px}
+.seg button{border-radius:999px;font:500 12.5px var(--mono);padding:7px 14px}
+.input,.search-pill{border-radius:14px}
+/* атлас */
+.atlas-tools{display:grid;gap:12px;margin-bottom:8px;position:sticky;top:calc(60px + env(safe-area-inset-top,0px));z-index:10;padding:10px 16px 12px;margin-inline:-16px;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+@media(min-width:700px){.atlas-tools{margin-inline:-28px;padding-inline:28px}}
+.search-pill{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);padding:0 14px;height:46px;box-shadow:var(--shadow)}
+.search-pill svg{width:18px;height:18px;color:var(--muted);flex-shrink:0}
+.search-pill input{border:0;outline:0;background:none;flex:1;min-width:0;height:100%}
+.search-pill input::-webkit-search-cancel-button{opacity:.5}
+.atlas-grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:22px 18px}
+@media(max-width:480px){.atlas-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 12px}}
+.sec-h{border-bottom:0;flex-wrap:wrap;gap:4px 12px;margin-top:22px;padding-bottom:0;align-items:baseline}
+.sec-h .eyebrow{flex-basis:100%}
+.sec-h h2{font:600 clamp(20px,3vw,26px)/1.15 var(--display);letter-spacing:-.01em;flex:1}
+.sec-h .note{font-size:12px}
+.slide-card{background:none;border:0;padding:0;gap:10px;color:inherit;font:inherit;text-align:left;box-shadow:none}
+.slide-card:hover{transform:none;box-shadow:none}
+.lens{position:relative;display:block;border-radius:50%;padding:6px;background:var(--lens);box-shadow:0 0 0 1px color-mix(in srgb,var(--line) 60%,transparent),0 18px 30px -18px rgba(20,10,30,.7);transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s}
+.lens::after{content:"";position:absolute;inset:6px;border-radius:50%;box-shadow:inset 0 0 22px 6px rgba(10,5,15,.55);pointer-events:none}
+.slide-card .field{margin:0;box-shadow:none;background:#20182c;border-radius:50%;width:100%;aspect-ratio:1;display:block}
+.slide-card:hover .lens{transform:translateY(-3px) rotate(-2deg);box-shadow:0 0 0 1px var(--hem),0 26px 36px -20px rgba(120,20,60,.6)}
+.slide-card:active .lens{transform:scale(.97)}
+.lens .no{position:absolute;left:2px;top:6px;z-index:2;font:600 11px/1 var(--mono);padding:6px 8px;border-radius:999px;background:color-mix(in srgb,var(--surface) 88%,transparent);color:var(--ink);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.lens .seen{position:absolute;right:4px;top:6px;z-index:2;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font:700 12px/1 var(--body);background:var(--good);color:#fff}
+.slide-card h3{font:600 15.5px/1.25 var(--display);letter-spacing:-.005em;padding-inline:4px}
+.slide-card .meta{font:500 10.5px/1.3 var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding-inline:4px;display:block}
+/* окуляр */
+.eyepiece{background:var(--lens);box-shadow:0 0 0 10px var(--lens),0 0 0 11px color-mix(in srgb,var(--line) 80%,transparent),0 40px 70px -30px rgba(20,8,30,.75)}
+.eyepiece::after{content:"";position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 40px 10px rgba(5,2,10,.5);pointer-events:none;z-index:1}
+.pin{z-index:2}
+.no-photo{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#cbbfd0;font:500 13px/1.5 var(--mono);padding:20%}
+.info h1{font:600 clamp(26px,4vw,40px)/1.08 var(--display);letter-spacing:-.02em}
+.info h3{font:600 18px/1.2 var(--display);letter-spacing:0;margin-top:28px}
+.official{margin:0 0 6px;padding:14px 16px;border-left:2px solid var(--hem);background:color-mix(in srgb,var(--hem-soft) 45%,transparent);border-radius:0 14px 14px 0;font:italic 500 16px/1.45 var(--display)}
+.official .eyebrow{display:flex;font-style:normal;margin-bottom:6px}
+.official .eyebrow::before{display:none}
+.feat li::before{width:6px;height:6px;top:.65em;background:var(--hem)}
+.diff div{background:color-mix(in srgb,var(--surface2) 70%,transparent);border-radius:14px}
+.legend .n{background:var(--ink);color:var(--bg)}
+.legend li:hover,.legend li.on{background:var(--hem-soft)}
+.pin{color:var(--eo);border-color:var(--eo)}
+.pin.q{background:var(--eo);border-color:#fff}
+/* главная */
+.hero{border:0;border-radius:32px;background:var(--ink);color:#F4EEF5;padding:clamp(24px,5vw,52px);box-shadow:0 40px 80px -40px rgba(20,8,30,.6);isolation:isolate}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(600px 400px at 85% 30%,rgba(184,50,94,.45),transparent 60%),radial-gradient(500px 400px at 0% 100%,rgba(90,60,170,.45),transparent 60%)}
+:root[data-theme="dark"] .hero{background:#1A1220}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hero{background:#1A1220}}
+.hero .eyebrow{color:#F3A9C0}
+.hero h1{font:600 clamp(40px,7.5vw,78px)/.95 var(--display);letter-spacing:-.035em;color:#fff}
+.hero h1 em{font-weight:500;color:#F3A9C0}
+.hero h1 .dot{color:#F07AA0}
+.hero p{color:#CDBFD3;font-size:16px;line-height:1.6}
+.hero .btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.25)}
+.hero .btn.primary{background:#fff;color:#1B1420;border-color:#fff}
+.hero .btn.primary:hover{background:#F07AA0;border-color:#F07AA0;color:#1A0F14}
+.hero .cont{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);color:#fff;box-shadow:none;backdrop-filter:blur(10px)}
+.hero .cont .note{color:#CDBFD3}
+.hero-lens{border:0;padding:0;cursor:pointer;max-width:320px;justify-self:center;width:100%;box-shadow:0 0 0 10px #000,0 0 0 11px rgba(255,255,255,.12),0 40px 70px -30px #000}
+.hero-lens img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-lens:hover img{transform:scale(1.06)}
+.hero-cap{position:absolute;left:50%;bottom:-46px;transform:translateX(-50%);width:max-content;max-width:115%;font:500 12.5px/1.3 var(--body);color:#CDBFD3;text-align:center}
+.hero-cap .mono{color:#F3A9C0;margin-right:4px}
+@media(min-width:860px){.hero{grid-template-columns:1fr 320px;padding-bottom:70px}}
+@media(max-width:859px){.hero-lens{max-width:260px;margin:6px auto 46px}}
+.cont-lens{width:64px;height:64px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#000;box-shadow:0 0 0 3px #000}
+.cont-lens img,.cont-lens canvas{width:100%;height:100%;object-fit:cover;display:block}
+.quick{gap:12px}
+.qa{border-radius:22px;background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow);padding:20px;min-height:116px;justify-content:flex-end;transition:transform .2s}
+.qa:hover{transform:translateY(-2px)}
+.qa b{font:600 20px/1.15 var(--display);color:var(--ink)}
+.qa span{color:var(--muted);opacity:1}
+.qa:not(.alt){background:#B8325E;border-color:#B8325E}
+.qa:not(.alt) b,.qa:not(.alt) span{color:#fff}
+.qa:not(.alt) span{opacity:.85}
+.qa:not(.alt)+.qa:not(.alt){background:#2C1E4A;border-color:#2C1E4A}
+:root[data-theme="dark"] .qa:not(.alt)+.qa:not(.alt){background:#3B2C66;border-color:#3B2C66}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .qa:not(.alt)+.qa:not(.alt){background:#3B2C66;border-color:#3B2C66}}
+.qa.alt b{color:var(--ink)}
+.colls{display:grid;gap:10px;margin-bottom:26px}
+@media(max-width:600px){.quick{grid-template-columns:1fr 1fr;gap:10px}.qa{min-height:128px;padding:16px}.qa b{font-size:17px}.qa span{font-size:12.5px}}
+@media(min-width:860px){.colls{grid-template-columns:1fr 1fr}}
+.coll-card{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;text-align:left;padding:14px 16px;border-radius:20px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);cursor:pointer;color:inherit;font:inherit;transition:transform .2s,border-color .2s}
+.coll-card:hover{transform:translateY(-2px);border-color:var(--hem)}
+.coll-card .cn{font:italic 600 40px/1 var(--display);color:var(--hem);width:34px;text-align:center}
+.coll-card .ct{display:grid;gap:5px;min-width:0}
+.coll-card .ct b{font:600 15px/1.3 var(--body)}
+.coll-card .bar{height:4px}
+.coll-card .stack{display:flex}
+.coll-card .stack img{width:38px;height:38px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px var(--surface);margin-left:-12px}
+@media(max-width:420px){.coll-card .stack{display:none}}
+.topic{border-radius:18px}
+.bar{background:color-mix(in srgb,var(--surface2) 80%,transparent)}
+.bar i{background:linear-gradient(90deg,var(--eo),var(--hem))}
+.stat b,.score,.grade .g{font-family:var(--display);font-weight:600}
+.coll h3,.result h2,.empty h3,.article h1,.prose h3{font-family:var(--display);font-weight:600}
+.article h1{font-size:clamp(26px,4vw,40px);letter-spacing:-.02em}
+.toc button[aria-current="true"]{background:var(--ink);color:var(--bg)}
+.opt{border-radius:16px}
+.opt .k{border-radius:999px}
+.msg.u{background:var(--ink);color:var(--bg)}
+footer{border-top:1px solid var(--line);font-size:12px;line-height:1.6}
+/* плавающий таб-бар как в iOS */
+@media(max-width:859px){
+  body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  .tabbar{left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));border-radius:26px;padding:6px;border:1px solid color-mix(in srgb,var(--line) 70%,transparent);background:color-mix(in srgb,var(--surface) 72%,transparent);backdrop-filter:saturate(1.8) blur(22px);-webkit-backdrop-filter:saturate(1.8) blur(22px);box-shadow:0 18px 40px -16px rgba(20,8,30,.45)}
+  .tabbar button{border-radius:20px;padding:8px 2px 7px;font-size:10.5px;font-weight:600;transition:background .2s,color .2s}
+  .tabbar button[aria-current="page"]{background:var(--ink);color:var(--bg)}
+  .tabbar svg{width:20px;height:20px}
+}
+/* мелочи */
+.mode-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;padding:12px 14px;margin:0 0 18px;border-radius:16px;background:var(--surface);border:1px solid var(--line);font-size:13.5px;color:var(--muted)}
+.mode-bar span:nth-child(2){flex:1 1 220px}
+.mode-bar b{color:var(--ink)}
+.dot-live{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px var(--good-soft);flex-shrink:0}
+.mode-bar.claude .dot-live{background:var(--hem);box-shadow:0 0 0 4px var(--hem-soft)}
+
+.info h3 .note{font:400 12.5px/1.3 var(--body);color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.lens,.qa,.coll-card,.hero-lens img{transition:none}}
 </style>
 
 </head><body><header class="top">
@@ -287,10 +440,12 @@ button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 <nav class="tabbar" id="tabbar"></nav>
 
 <main class="wrap" id="app"></main>
-<footer class="wrap">Тканика · учебный проект по общей гистологии. Реальные микрофото — Wikimedia Commons (в основном CC0, Berkshire Community College Bioscience Image Library; автор и лицензия подписаны под каждым снимком). Схемы полей нарисованы программно в цветах реальных окрасок. AI-ответы проверяйте по учебнику.</footer>
+<footer class="wrap">Тканика · учебный проект по общей гистологии. Реальные микрофото — Wikimedia Commons (в основном CC0, Berkshire Community College Bioscience Image Library; автор и лицензия подписаны под каждым снимком). Схемы полей нарисованы программно в цветах реальных окрасок. Номера и названия препаратов — по спискам кафедры гистологии, эмбриологии и цитологии лечебного факультета РНИМУ им. Н.И. Пирогова. ИИ работает на устройстве (DINOv2-small через transformers.js) или через Claude; ответы проверяйте по учебнику.</footer>
 
 <script src="ai-browser.js"></script>
+<script src="ai-local.js"></script>
 <script src="data.js"></script>
+<script src="rsmu.js"></script>
 <script src="slides.js"></script>
 <script src="app.js"></script>
 </body></html>

@@ -101,7 +101,7 @@
 
   window.claude = {
     browserShim: true,
-    use: async (name) => (name === "sample" ? (getKey() ? sample : null) : name === "downloads" ? downloads : null),
+    use: async (name) => (name === "sample" ? (getKey() ? sample : (window.TKLocal && window.TKLocal.sample) || null) : name === "downloads" ? downloads : null),
   };
 
   /* ---------- окно подключения ключа ---------- */

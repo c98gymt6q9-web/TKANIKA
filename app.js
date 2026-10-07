@@ -5,7 +5,7 @@
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
   const h = (html) => { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstElementChild; };
   const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-  const secName = (id) => TK.sections.find((s) => s.id === id)?.name || "";
+  const secName = (id) => TK.sections.find((s) => s.id === id)?.name || (TK.systems && TK.systems[id]) || "";
   const prepById = (id) => TK.preps.find((p) => p.id === id);
 
   /* ---------- прогресс (только в браузере зрителя) ---------- */
@@ -30,6 +30,10 @@
     const m = { not_granted: "Доступ к AI для этой страницы не разрешён.", sampling_disabled: "AI недоступен для этого аккаунта.", rate_limited: "Слишком много запросов — попробуйте через минуту.", session_expired: "Сессия истекла — войдите в Claude заново.", image_rejected: "Файл не подошёл: нужен JPEG, PNG, WebP или GIF до 20 МБ.", images_unavailable: "В этом окне AI не принимает изображения.", refused: "AI не стал отвечать на этот запрос — переформулируйте его.", invalid_json: "AI ответил в неожиданном формате — нажмите ещё раз.", prompt_too_large: "Слишком длинный текст — сократите ответ.", bad_key: "Ключ API не подошёл — проверьте его в настройках AI.", network: "Нет связи с AI — проверьте интернет.", api_error: "Сервис AI вернул ошибку — попробуйте ещё раз." };
     return m[e && e.code] || "Не удалось получить ответ AI. Попробуйте ещё раз.";
   }
+  const isLocal = () => !!(sample && sample.local);
+  const modeBar = () => !sample ? "" : isLocal()
+    ? `<div class="mode-bar"><span class="dot-live"></span><span><b>ИИ на устройстве</b> · работает без ключа: сравнивает снимок с микрофото атласа, отвечает по теории приложения.</span>${window.TKAI ? `<button class="btn sm" onclick="TKAI.open()">Подключить Claude</button>` : ""}</div>`
+    : `<div class="mode-bar claude"><span class="dot-live"></span><span><b>Claude</b> · развёрнутые ответы и разбор снимков.</span>${window.TKAI && window.TKAI.connected && window.TKAI.connected() ? `<button class="btn sm" onclick="TKAI.open()">Ключ</button>` : ""}</div>`;
   const thinking = (t = "AI рассматривает препарат…") => `<div class="thinking"><span class="dot3"><i></i><i></i><i></i></span>${esc(t)}</div>`;
   const noAI = `<div class="note" style="padding:12px 14px;border-radius:10px;background:var(--warn-soft);color:var(--warn)">AI-функции работают внутри Claude или в любом браузере с вашим ключом Anthropic API. Атлас, база знаний и тесты доступны всегда.${window.TKAI ? ` <button class="btn sm" style="margin-top:8px" onclick="TKAI.open()">${'Подключить AI'}</button>` : ""}</div>`;
 
@@ -87,31 +91,60 @@
   function pump() { if (busy || !queue.length) return; busy = true; setTimeout(() => { try { queue.shift()(); } finally { busy = false; pump(); } }, 16); }
 
   /* ================= АТЛАС ================= */
-  let atlasFilter = "all";
+  const hasScheme = (id) => Slides.ids.includes(id);
+  const firstPhoto = (id) => (TK.photos[id] || [])[0];
+  const viewable = (p) => hasScheme(p.id) || !!firstPhoto(p.id);
+  /* превью препарата: реальное фото, иначе схема */
+  function fieldHTML(p, w = 330, cls = "field") {
+    const ph = firstPhoto(p.id);
+    return ph ? `<img class="${cls}" loading="lazy" decoding="async" src="${TK.photoUrl(ph, w)}" alt="" data-fb="${p.id}">` : `<canvas class="${cls}" data-id="${p.id}" aria-hidden="true"></canvas>`;
+  }
+  function paintFields(root, size) {
+    $$("canvas[data-id]", root).forEach((cv) => paint(cv, cv.dataset.id, size));
+    $$("img[data-fb]", root).forEach((im) => (im.onerror = () => { if (!hasScheme(im.dataset.fb)) return; const cv = h(`<canvas class="${im.className}" aria-hidden="true"></canvas>`); im.replaceWith(cv); paint(cv, im.dataset.fb, size); }));
+  }
+  const inCol = (p, n) => (p.col || []).includes(n);
+  const groupsAll = () => [
+    ...TK.colls.map((c) => ({ key: "k" + c.n, eyebrow: "Коллоквиум " + c.n, title: c.title, preps: TK.preps.filter((p) => inCol(p, c.n)).sort((a, b) => parseInt(a.no) - parseInt(b.no) || a.no.localeCompare(b.no)) })),
+    { key: "final", eyebrow: "Итоговые", title: "Суммарные препараты по общей гистологии", preps: TK.final.map(prepById).filter(Boolean) },
+    { key: "extra", eyebrow: "Дополнительно", title: "Препараты к занятиям вне списков коллоквиумов", preps: TK.preps.filter((p) => !(p.col || []).length) },
+  ];
+  let atlasFilter = "all", atlasQ = "";
   function atlasView(app) {
-    const secs = atlasFilter === "all" ? TK.sections : TK.sections.filter((s) => s.id === atlasFilter);
+    const all = groupsAll();
+    const q = atlasQ.trim().toLowerCase().replace(/^№/, "");
+    const match = (p) => !q || [p.title, p.official, p.organ, p.stain, p.no].join(" ").toLowerCase().includes(q);
+    const groups = all.filter((g) => atlasFilter === "all" ? g.key !== "final" : g.key === atlasFilter)
+      .map((g) => ({ ...g, preps: g.preps.filter(match) })).filter((g) => g.preps.length);
+    const seenN = TK.preps.filter((p) => P.seen[p.id]).length;
     app.innerHTML = `
       <div class="page-h">
-        <div><div class="eyebrow">Атлас препаратов</div><h1>${TK.preps.length} препаратов общей гистологии</h1>
-        <p>Реальные микрофото и схемы полей зрения с подписями структур, двумя увеличениями и режимом самопроверки. Открой препарат и найди на нём всё, что спросят на зачёте.</p></div>
+        <div><div class="eyebrow">Атлас · кафедра гистологии РНИМУ им. Пирогова</div><h1>${TK.preps.length} препаратов <em>к коллоквиумам</em></h1>
+        <p>Номера и названия — как в списках кафедры лечебного факультета. Реальные микрофото, признаки для ответа и «не перепутать». Изучено ${seenN} из ${TK.preps.length}.</p></div>
       </div>
-      <div class="chips" role="group" aria-label="Раздел" style="margin-bottom:18px">
-        <button class="chip" data-f="all" aria-pressed="${atlasFilter === "all"}">Все</button>
-        ${TK.sections.map((s) => `<button class="chip" data-f="${s.id}" aria-pressed="${atlasFilter === s.id}">${s.short}</button>`).join("")}
+      <div class="atlas-tools">
+        <label class="search-pill">${I.search}<input id="aq" type="search" placeholder="Название, орган или №" value="${esc(atlasQ)}" autocomplete="off" enterkeyhint="search"></label>
+        <div class="chips scroll" role="group" aria-label="Коллоквиум">
+          <button class="chip" data-f="all" aria-pressed="${atlasFilter === "all"}">Все</button>
+          ${TK.colls.map((c) => `<button class="chip" data-f="k${c.n}" aria-pressed="${atlasFilter === "k" + c.n}" title="${esc(c.title)}">К${c.n}</button>`).join("")}
+          <button class="chip" data-f="final" aria-pressed="${atlasFilter === "final"}">Итоговые</button>
+          <button class="chip" data-f="extra" aria-pressed="${atlasFilter === "extra"}">Доп.</button>
+        </div>
       </div>
-      <div class="atlas-grid">
-        ${secs.map((s) => `<div class="sec-h"><h2>${s.name}</h2><span class="note mono">${TK.preps.filter((p) => p.sec === s.id).length} преп.</span></div>` +
-          TK.preps.filter((p) => p.sec === s.id).map((p) => `
-          <button class="card slide-card" data-p="${p.id}">
-            ${TK.photos[p.id] ? `<img class="field" loading="lazy" decoding="async" src="${TK.photoUrl(TK.photos[p.id][0], 330)}" alt="" data-fb="${p.id}">` : `<canvas class="field" data-id="${p.id}" aria-hidden="true"></canvas>`}
+      <div class="atlas-grid" id="agrid">
+        ${groups.length ? groups.map((g) => `<div class="sec-h"><span class="eyebrow">${esc(g.eyebrow)}</span><h2>${esc(g.title)}</h2><span class="note mono">${g.preps.length}</span></div>` +
+          g.preps.map((p) => `
+          <button class="slide-card" data-p="${p.id}">
+            <span class="lens">${fieldHTML(p)}${p.no ? `<span class="no">№${esc(p.no)}</span>` : ""}${P.seen[p.id] ? '<span class="seen" title="Изучен">✓</span>' : ""}</span>
             <h3>${esc(p.title)}</h3>
-            <div class="meta"><span class="pill eo">${esc(p.stain.split(" (")[0].split("+")[0].trim())}</span>${P.seen[p.id] ? '<span class="pill good">изучен</span>' : ""}</div>
-          </button>`).join("")).join("")}
+            <span class="meta">${esc(p.stain.split(" (")[0].split(",")[0].trim())}</span>
+          </button>`).join("")).join("") : `<div class="empty" style="grid-column:1/-1"><h3>Ничего не нашлось</h3><p>Попробуйте номер препарата, например «44», или название органа.</p></div>`}
       </div>`;
     $$("[data-f]", app).forEach((b) => (b.onclick = () => { atlasFilter = b.dataset.f; render(); }));
     $$("[data-p]", app).forEach((b) => (b.onclick = () => go("atlas", b.dataset.p)));
-    $$("canvas.field", app).forEach((cv) => paint(cv, cv.dataset.id, 220));
-    $$("img[data-fb]", app).forEach((im) => (im.onerror = () => { const cv = h(`<canvas class="field" aria-hidden="true"></canvas>`); im.replaceWith(cv); paint(cv, im.dataset.fb, 220); }));
+    const aq = $("#aq");
+    aq.oninput = () => { atlasQ = aq.value; const pos = aq.selectionStart; atlasView(app); const n = $("#aq"); n.focus(); n.setSelectionRange(pos, pos); };
+    paintFields(app, 220);
   }
 
   /* масштаб и перетаскивание реального снимка в окуляре */
@@ -127,49 +160,51 @@
     wrap.onpointerup = wrap.onpointercancel = () => { drag = false; wrap.style.cursor = "grab"; };
   }
 
-  const artFor = (p) => ({ bone: "bone-art", adipose: "special-ct" })[p.id] || ({ epi: "epi-class", blood: "blood-art", ct: "loose", skel: "cartilage", musc: "muscle-art", nerv: "nerve-art" })[p.sec];
+  const artFor = (p) => ({ bone: "bone-art", adipose: "special-ct", reticular: "special-ct", osteoDirect: "bone-art", osteoIndirect: "bone-art" })[p.id] || ({ epi: "epi-class", glands: "glands", blood: "blood-art", ct: "loose", skel: "cartilage", musc: "muscle-art", nerv: "nerve-art", nsys: "nerve-art" })[p.sec] || null;
 
   let det = { zoom: 1, mode: "show", revealed: {}, src: "photo", pi: 0 };
   function detailView(app, id) {
     const p = prepById(id); if (!p) return go("atlas");
     P.seen[id] = 1; P.last = { tab: "atlas", sub: id }; save();
-    const photos = TK.photos[id] || [], usePhoto = det.src === "photo" && photos.length > 0, pi = Math.min(det.pi, photos.length - 1);
+    const photos = TK.photos[id] || [], scheme = hasScheme(id), usePhoto = photos.length > 0 && (det.src === "photo" || !scheme), pi = Math.min(det.pi, photos.length - 1);
+    const colLine = (p.col || []).map((n) => "Коллоквиум " + n).join(", ") + (TK.final.includes(id) ? (p.col && p.col.length ? " · " : "") + "итоговый" : "");
     app.innerHTML = `
       <button class="back" id="back">${I.back} Все препараты</button>
       <div class="detail">
         <div class="scope">
-          <div class="eyepiece" id="eye">${usePhoto ? `<div class="photo-pan" id="pan"><img id="ph" src="${TK.photoUrl(photos[pi], 960)}" alt="Микрофото: ${esc(p.title)}" draggable="false"></div>` : `<canvas id="cv" role="img" aria-label="Поле зрения: ${esc(p.title)}"></canvas>`}</div>
-          ${photos.length ? `<div class="scope-bar"><div class="seg" role="group" aria-label="Источник"><button data-src="photo" aria-pressed="${usePhoto}">Фото</button><button data-src="scheme" aria-pressed="${!usePhoto}">Схема</button></div>
+          <div class="eyepiece" id="eye">${usePhoto ? `<div class="photo-pan" id="pan"><img id="ph" src="${TK.photoUrl(photos[pi], 960)}" alt="Микрофото: ${esc(p.title)}" draggable="false"></div>` : scheme ? `<canvas id="cv" role="img" aria-label="Поле зрения: ${esc(p.title)}"></canvas>` : `<div class="no-photo">Фото препарата пока нет —<br>посмотрите в Commons</div>`}</div>
+          ${photos.length ? `<div class="scope-bar">${scheme ? `<div class="seg" role="group" aria-label="Источник"><button data-src="photo" aria-pressed="${usePhoto}">Фото</button><button data-src="scheme" aria-pressed="${!usePhoto}">Схема</button></div>` : ""}
             ${usePhoto && photos.length > 1 ? `<div class="seg" role="group" aria-label="Снимок">${photos.map((_, i) => `<button data-pi="${i}" aria-pressed="${i === pi}">Снимок ${i + 1}</button>`).join("")}</div>` : ""}</div>` : ""}
           ${usePhoto ? `<p class="note credit">Фото: <a href="${photos[pi].page}" target="_blank" rel="noopener">${esc(photos[pi].by || "Wikimedia Commons")}</a> · ${esc(photos[pi].lic)} · ${det.zoom > 1 ? "перетаскивай снимок" : "Wikimedia Commons"}</p>` : ""}
           <div class="scope-bar">
             <div class="seg" role="group" aria-label="Увеличение">
               <button data-z="1" aria-pressed="${det.zoom === 1}">Малое</button><button data-z="2.5" aria-pressed="${det.zoom === 2.5}">Большое</button>
             </div>
-            <div class="seg" role="group" aria-label="Подписи">
+            <div class="seg" role="group" aria-label="Подписи" ${scheme ? "" : "hidden"}>
               <button data-m="show" aria-pressed="${det.mode === "show"}">Подписи</button><button data-m="quiz" aria-pressed="${det.mode === "quiz"}">Самопроверка</button>${usePhoto ? "" : `<button data-m="none" aria-pressed="${det.mode === "none"}">Без меток</button>`}
             </div>
           </div>
         </div>
         <div class="info">
-          <div class="row"><span class="pill hem">${secName(p.sec)}</span><span class="pill">${esc(p.mag)}</span></div>
+          <div class="row">${p.no ? `<span class="pill no-pill">№${esc(p.no)}</span>` : ""}<span class="pill hem">${secName(p.sec)}</span><span class="pill">${esc(p.mag)}</span></div>
           <h1>${esc(p.title)}</h1>
+          ${p.official ? `<p class="official"><span class="eyebrow">В списке кафедры${colLine ? " · " + esc(colLine) : ""}</span>«${esc(p.official)}»</p>` : ""}
           <dl class="kv"><dt>Орган</dt><dd>${esc(p.organ)}</dd><dt>Окраска</dt><dd>${esc(p.stain)}</dd></dl>
-          <h3>Структуры на поле <span class="note" id="lgNote"></span></h3>
-          <ol class="legend" id="legend"></ol>
+          <div ${scheme ? "" : "hidden"}><h3>Структуры на поле <span class="note" id="lgNote"></span></h3>
+          <ol class="legend" id="legend"></ol></div>
           <h3>Как узнать препарат</h3>
           <ul class="feat">${p.keys.map((k) => `<li>${esc(k)}</li>`).join("")}</ul>
           <h3>Не перепутать</h3>
           <div class="diff">${p.diff.map(([a, b]) => `<div><b>${esc(a)}:</b> ${esc(b)}</div>`).join("")}</div>
           <div class="row" style="margin-top:22px">
             <a class="btn sm" href="${p.commons}" target="_blank" rel="noopener">${I.ext} Ещё фото в Commons</a>
-            <button class="btn sm" id="toArt">${I.kb} Теория</button>
+            ${artFor(p) ? `<button class="btn sm" id="toArt">${I.kb} Теория</button>` : ""}
           </div>
           <div class="ask" id="askBox"></div>
         </div>
       </div>`;
     $("#back").onclick = () => go("atlas");
-    $("#toArt").onclick = () => { kbState.id = artFor(p); go("kb"); };
+    if ($("#toArt")) $("#toArt").onclick = () => { kbState.id = artFor(p); go("kb"); };
     $$("[data-z]", app).forEach((b) => (b.onclick = () => { det.zoom = +b.dataset.z; det.revealed = {}; detailView(app, id); }));
     $$("[data-m]", app).forEach((b) => (b.onclick = () => { det.mode = b.dataset.m; det.revealed = {}; detailView(app, id); }));
     $$("[data-src]", app).forEach((b) => (b.onclick = () => { det.src = b.dataset.src; det.revealed = {}; detailView(app, id); }));
@@ -177,7 +212,8 @@
     const eye = $("#eye");
     const size = Math.min(560, eye.clientWidth || 340);
     let cv = $("#cv");
-    if (usePhoto) { cv = document.createElement("canvas"); photoPan($("#pan"), $("#ph"), det.zoom); $("#ph").onerror = () => { det.src = "scheme"; detailView(app, id); }; }
+    if (usePhoto) { photoPan($("#pan"), $("#ph"), det.zoom); $("#ph").onerror = () => { if (scheme) { det.src = "scheme"; detailView(app, id); } else $("#pan").innerHTML = `<div class="no-photo">Снимок не загрузился</div>`; }; }
+    if (!cv) cv = document.createElement("canvas");
     const labels = Slides.render(id, cv, { size, zoom: det.zoom });
     const lg = $("#legend");
     $("#lgNote").textContent = usePhoto ? (det.mode === "quiz" ? "· найди на фото, потом открой" : "· найди их на снимке") : det.mode === "quiz" ? "· нажми на пункт, чтобы открыть" : "";
@@ -217,7 +253,7 @@
       const btn = $("button", form); btn.disabled = true;
       const rules = `Ты — дружелюбный преподаватель гистологии медицинского вуза (российская школа, терминология как в учебнике Афанасьева). Отвечай по-русски, коротко и по делу (до 150 слов), без markdown-заголовков. Контекст темы: ${ctxFn().slice(0, 7000)}`;
       try {
-        const { text } = await sample([{ role: "user", content: rules }, ...turns.slice(-8)], { cache: false, onText: ({ text }) => { bubble.textContent = text; } });
+        const { text } = await sample([{ role: "user", content: rules }, ...turns.slice(-8)], { cache: false, task: { kind: "chat", question: q }, onText: ({ text }) => { bubble.textContent = text; } });
         turns.push({ role: "assistant", content: text });
       } catch (x) { turns.pop(); bubble.remove(); err.textContent = aiErr(x); if (x && x.text) {} }
       btn.disabled = false; draw();
@@ -233,12 +269,12 @@
     app.innerHTML = `
       <div class="page-h"><div><div class="eyebrow">Анализ препарата по фото</div><h1>Сними препарат — узнай, что это</h1>
       <p>Снимок с окуляра на телефон подойдёт. AI назовёт препарат, покажет признаки, по которым его узнал, с чем его легко спутать, и сразу откроет теорию.</p></div></div>
-      ${aiSeg()}
+      ${aiSeg()}${modeBar()}
       <div class="ai-grid">
         <div>
           <label class="drop" id="drop" tabindex="0">
             <input type="file" id="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
-            ${AI.url ? `<img src="${AI.url}" alt="Загруженный препарат">${AI.demo ? `<span class="pill hem">поле из атласа · название скрыто от AI</span>` : `<span class="note">Нажмите, чтобы заменить фото</span>`}` :
+            ${AI.url ? `<img src="${AI.url}" alt="Загруженный препарат">${AI.demo ? `<span class="pill hem">поле из атласа · название скрыто от AI${isLocal() ? " · в локальном режиме снимок есть в базе" : ""}</span>` : `<span class="note">Нажмите, чтобы заменить фото</span>`}` :
               `<span class="ic">${I.upload}</span><b>Перетащите фото препарата</b><span class="note">или нажмите, чтобы выбрать файл · JPEG, PNG, WebP</span>`}
           </label>
           <div class="field-row"><label for="stain">Окраска, если знаешь</label>
@@ -266,7 +302,7 @@
     if ($("#clear")) $("#clear").onclick = () => { AI.file = AI.url = AI.demo = AI.result = null; AI.err = ""; aiView(app); };
     $("#go").onclick = () => identify(app);
     const demos = $("#demos");
-    shuffle(TK.preps).slice(0, 8).forEach((p) => {
+    shuffle(TK.preps.filter(viewable)).slice(0, 8).forEach((p) => {
       const ph = (TK.photos[p.id] || [])[0];
       const b = h(`<button aria-label="Пример препарата">${ph ? `<img src="${TK.photoUrl(ph, 120)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">` : "<canvas></canvas>"}</button>`); demos.appendChild(b);
       if (!ph) paint($("canvas", b), p.id, 64);
@@ -318,6 +354,7 @@
   async function identify(app) {
     if (!sample || !AI.file) return;
     AI.busy = true; AI.err = ""; AI.result = null; $("#go").disabled = true; drawResult();
+    const off = isLocal() && window.TKLocal ? TKLocal.onProgress((p) => { const el = $("#res"); if (el && AI.busy) el.innerHTML = thinking(p.done ? "Сравниваю с атласом…" : `Скачиваю модель на устройство (один раз): ${Math.round(p.loaded / 1048576)} из ${Math.round(p.total / 1048576)} МБ`); }) : null;
     const list = TK.preps.map((p) => `${p.id} — ${p.title} (${p.organ}; ${p.stain})`).join("\n");
     const prompt = `Ты — опытный преподаватель гистологии медицинского вуза (российская школа, учебник Афанасьева и Юриной). Студент прислал изображение гистологического препарата (фото с микроскопа или схематичное изображение поля зрения). Определи препарат.
 Курс — общая гистология: эпителиальные ткани, кровь, соединительные ткани, хрящ и кость, мышечные ткани, нервная ткань.
@@ -328,8 +365,9 @@ ${list}
 {"is_histology": true, "prep_title": "полное название препарата, как на зачёте", "tissue_group": "группа тканей", "atlas_id": "id из списка выше или null", "confidence": 0-100, "stain": "вероятная окраска", "magnification": "малое / большое / иммерсия", "features": ["3–5 признаков, которые реально видны на изображении"], "alternatives": [{"title": "похожий препарат", "why_not": "почему это не он"}], "tip": "как назвать препарат и что показать преподавателю, 1–2 предложения", "caution": "что мешает уверенному ответу, или пустая строка"}
 Пиши по-русски. Если на изображении нет гистологического препарата — is_histology: false и объяснение в caution.`;
     try {
-      AI.result = await sample.json(prompt, { images: AI.file });
-    } catch (e) { AI.err = aiErr(e); }
+      AI.result = await sample.json(prompt, { images: AI.file, task: { kind: "identify", stain: AI.stain } });
+    } catch (e) { AI.err = isLocal() && !e.code ? "Не удалось загрузить локальную модель — при первом запуске нужен интернет." : aiErr(e); }
+    if (off) off();
     AI.busy = false;
     if (view.tab === "ai") { drawResult(); const g = $("#go"); if (g) g.disabled = false; }
   }
@@ -340,7 +378,7 @@ ${list}
     app.innerHTML = `
       <div class="page-h"><div><div class="eyebrow">AI-помощник</div><h1>Спроси про любую ткань</h1>
       <p>Отвечает на вопросы по общей гистологии, собирает карточки для повторения и подсказывает, где это в атласе.</p></div></div>
-      ${aiSeg()}
+      ${aiSeg()}${modeBar()}
       <div class="ai-grid">
         <div class="card" style="padding:18px">
           <div class="field-row" style="margin-top:0"><label for="hsec">Тема</label><select class="input" id="hsec">${TK.sections.map((x) => `<option value="${x.id}" ${x.id === H.sec ? "selected" : ""}>${x.name}</option>`).join("")}</select></div>
@@ -367,7 +405,7 @@ ${list}
       const prompt = `Составь 5 карточек для повторения по теме «${secName(H.sec)}» (общая гистология, российский медвуз). Вопросы разные: определение, классификация, строение, отличия препаратов, функции. Ответ на карточке — 1–2 предложения.
 Материал: ${B.def} ${B.feat} ${B.cls} ${B.fn} ${strip(art.body).slice(0, 5000)}
 Ответь ТОЛЬКО JSON-массивом: [{"q": "вопрос", "a": "ответ"}]`;
-      try { const r = await sample.json(prompt, { cache: false }); H.cards = (Array.isArray(r) ? r : []).filter((c) => c && c.q && c.a).slice(0, 5); if (!H.cards.length) H.err = "AI не прислал карточки — попробуйте ещё раз."; }
+      try { const r = await sample.json(prompt, { cache: false, task: { kind: "cards", sec: secName(H.sec) } }); H.cards = (Array.isArray(r) ? r : []).filter((c) => c && c.q && c.a).slice(0, 5); if (!H.cards.length) H.err = "AI не прислал карточки — попробуйте ещё раз."; }
       catch (e) { H.err = aiErr(e); }
       H.busy = false; if (view.tab === "ai" && AI.mode === "helper") { drawCards(); const b = $("#mkCards"); if (b) b.disabled = false; }
     };
@@ -376,8 +414,9 @@ ${list}
   }
 
   /* ================= ГЛАВНАЯ ================= */
-  const heroSeed = (Math.random() * 1e9) | 0, heroPrep = TK.preps[Math.floor(Math.random() * TK.preps.length)];
+  const heroSeed = (Math.random() * 1e9) | 0, heroPool = () => TK.preps.filter((p) => firstPhoto(p.id)); let heroPrep = null;
   function homeView(app) {
+    if (!heroPrep) { const pool = heroPool(); heroPrep = pool[(Math.random() * pool.length) | 0]; }
     const hour = new Date().getHours(), hi = hour < 6 ? "Доброй ночи" : hour < 12 ? "Доброе утро" : hour < 18 ? "Добрый день" : "Добрый вечер";
     const L = P.last; let cont = null;
     if (L && L.tab === "atlas" && prepById(L.sub)) { const p = prepById(L.sub); cont = { t: p.title, s: "Атлас · " + secName(p.sec), prep: p.id, go: () => go("atlas", p.id) }; }
@@ -389,12 +428,12 @@ ${list}
     };
     app.innerHTML = `
       <section class="hero">
-        <div><div class="eyebrow">${hi}</div><h1>Тканика<span style="color:var(--hem)">.</span><br>Архитектура живого</h1>
-          <p>Гистология — это язык, на котором говорит тело. Атлас препаратов, теория по блокам, тесты с разбором ошибок и AI, который узнаёт препарат по фото.</p>
-          ${cont ? `<button class="card cont" id="cont">${cont.prep ? `<canvas id="contCv"></canvas>` : `<span class="ic" style="width:64px;height:64px;border-radius:50%;background:var(--hem-soft);color:var(--hem);display:grid;place-items:center;flex-shrink:0">${I.kb}</span>`}<span><span class="eyebrow">Продолжить обучение</span><b style="display:block;margin-top:6px">${esc(cont.t)}</b><span class="note">${esc(cont.s)}</span></span></button>` :
+        <div><div class="eyebrow">${hi}</div><h1>Тканика<span class="dot">.</span><br><em>архитектура живого</em></h1>
+          <p>${TK.preps.length} препаратов кафедры гистологии РНИМУ им. Пирогова — с реальными микрофото, признаками для ответа и номерами, как в списках к коллоквиумам. Плюс теория, тесты и AI, который узнаёт препарат по фото.</p>
+          ${cont ? `<button class="card cont" id="cont">${cont.prep ? `<span class="cont-lens">${fieldHTML(prepById(cont.prep), 120, "")}</span>` : `<span class="ic" style="width:64px;height:64px;border-radius:50%;background:var(--hem-soft);color:var(--hem);display:grid;place-items:center;flex-shrink:0">${I.kb}</span>`}<span><span class="eyebrow">Продолжить обучение</span><b style="display:block;margin-top:6px">${esc(cont.t)}</b><span class="note">${esc(cont.s)}</span></span></button>` :
             `<div class="row" style="margin-top:20px"><button class="btn primary" id="start">${I.kb} Начать с теории</button><button class="btn" id="toAtlas">${I.atlas} Открыть атлас</button></div>`}
         </div>
-        <div class="eyepiece" aria-hidden="true"><canvas id="heroCv"></canvas></div>
+        <button class="eyepiece hero-lens" id="heroLens" aria-label="Открыть препарат: ${esc(heroPrep.title)}"><span class="photo-pan">${fieldHTML(heroPrep, 500, "")}</span><span class="hero-cap"><span class="mono">№${esc(heroPrep.no || "—")}</span> ${esc(heroPrep.title)}</span></button>
       </section>
       <div class="quick">
         <button class="qa" id="qScan"><b>Скан препарата</b><span>Фото с микроскопа → название, признаки, теория</span></button>
@@ -402,10 +441,15 @@ ${list}
         <button class="qa alt" id="qExam"><b>AI-экзаменатор</b><span>Тяни билет, отвечай — получи оценку</span></button>
         <button class="qa alt" id="qMist"><b>Работа над ошибками</b><span>${mistakeCount()} ${plural(mistakeCount(), "вопрос", "вопроса", "вопросов")} к повторению</span></button>
       </div>
+      <div class="sec-h" style="margin-bottom:12px"><span class="eyebrow">Кафедра</span><h2>Коллоквиумы</h2><span class="note">препараты изучены</span></div>
+      <div class="colls">${TK.colls.map((c) => { const ps = TK.preps.filter((p) => (p.col || []).includes(c.n)), d = ps.filter((p) => P.seen[p.id]).length, ph = ps.map((p) => firstPhoto(p.id)).filter(Boolean).slice(0, 3);
+        return `<button class="coll-card" data-k="${c.n}"><span class="cn">${c.n}</span><span class="ct"><b>${esc(c.title)}</b><span class="note mono">${d}/${ps.length} препаратов</span><span class="bar"><i style="width:${ps.length ? (d / ps.length) * 100 : 0}%"></i></span></span><span class="stack">${ph.map((x) => `<img src="${TK.photoUrl(x, 120)}" alt="" loading="lazy">`).join("")}</span></button>`; }).join("")}</div>
       <div class="sec-h" style="margin-bottom:12px"><h2>Прогресс по темам</h2><span class="note">вопросы · тесты · препараты</span></div>
       <div class="topics">${TK.sections.map((x) => { const v = topicPct(x.id); return `<button class="card topic" data-sec="${x.id}"><b>${x.name}</b><span class="mono note">${v}%</span><div class="bar"><i style="width:${v}%"></i></div></button>`; }).join("")}</div>`;
-    paint($("#heroCv"), heroPrep.id, 300, { seed: heroSeed });
-    if (cont) { $("#cont").onclick = cont.go; if (cont.prep) paint($("#contCv"), cont.prep, 64); }
+    paintFields(app, 300);
+    $("#heroLens").onclick = () => go("atlas", heroPrep.id);
+    $$("[data-k]", app).forEach((b) => (b.onclick = () => { atlasFilter = "k" + b.dataset.k; atlasQ = ""; go("atlas"); }));
+    if (cont) { $("#cont").onclick = cont.go; }
     else { $("#start").onclick = () => { kbState.id = "intro"; go("kb"); }; $("#toAtlas").onclick = () => go("atlas"); }
     $("#qScan").onclick = () => { AI.mode = "scan"; go("ai"); };
     $("#qPrep").onclick = () => go("coll", { mode: "prep", i: 0, score: 0, items: makePrepQuiz() });
@@ -457,11 +501,11 @@ ${list}
       };
     };
     showConsp();
-    if (!sample) { cb.disabled = true; cb.title = "AI доступен при открытии в Claude"; }
+    if (!sample) { cb.disabled = true; cb.title = "AI недоступен"; }
     cb.onclick = async () => {
       cb.disabled = true; out.innerHTML = thinking("Собираю конспект…");
       const prompt = `Составь краткий конспект-шпаргалку для подготовки к коллоквиуму по гистологии на тему «${a.title}». Опирайся на материал ниже, терминология российских учебников. Формат: простой текст, 8–12 строк, каждая строка начинается с «• », без заголовков и markdown-разметки, в конце строка «Запомни: …» с одним мнемоническим приёмом.\n\nМатериал: ${(a.lead + " " + strip(a.body)).slice(0, 7000)}`;
-      try { const { text } = await sample(prompt, { onText: ({ text }) => { consp[a.id] = text; showConsp(); } }); consp[a.id] = text; showConsp(); }
+      try { const { text } = await sample(prompt, { task: { kind: "conspect", material: a.lead + " " + strip(a.body), title: a.title }, onText: ({ text }) => { consp[a.id] = text; showConsp(); } }); consp[a.id] = text; showConsp(); }
       catch (e) { out.innerHTML = `<p class="note" style="color:var(--bad)">${esc(aiErr(e))}</p>`; }
       cb.disabled = false;
     };
@@ -550,18 +594,19 @@ ${list}
       if ($("#why")) $("#why").onclick = async () => {
         const w = $("#why"); w.disabled = true; const ex = $("#expl"); ex.innerHTML = thinking("Разбираю ошибку…");
         const prompt = `Ты — преподаватель гистологии. Студент ответил на тестовый вопрос неправильно. Вопрос: «${q}». Варианты: ${opts.map((o, i) => "АБВГ"[i] + ") " + o).join("; ")}. Студент выбрал: «${opts[pick]}». Правильно: «${opts[ans]}». Объясни по-русски, обращаясь на «ты», в 3–4 предложениях: почему выбранный вариант неверен, почему верен правильный, и дай короткий приём, как запомнить. Без markdown.`;
-        try { await sample(prompt, { onText: ({ text }) => { ex.innerHTML = `<div class="a" style="margin-bottom:12px">${esc(text)}</div>`; } }); }
+        try { await sample(prompt, { task: { kind: "why", question: q, right: opts[ans] }, onText: ({ text }) => { ex.innerHTML = `<div class="a" style="margin-bottom:12px">${esc(text)}</div>`; } }); }
         catch (e) { ex.innerHTML = `<p class="note" style="color:var(--bad)">${esc(aiErr(e))}</p>`; w.disabled = false; }
       };
     }));
   }
 
   function makePrepQuiz() {
-    return shuffle(TK.preps).slice(0, 10).map((p) => {
-      const same = shuffle(TK.preps.filter((x) => x.id !== p.id && x.sec === p.sec)), other = shuffle(TK.preps.filter((x) => x.id !== p.id && x.sec !== p.sec));
+    const pool = TK.preps.filter(viewable);
+    return shuffle(pool).slice(0, 10).map((p) => {
+      const same = shuffle(pool.filter((x) => x.id !== p.id && x.sec === p.sec)), other = shuffle(pool.filter((x) => x.id !== p.id && x.sec !== p.sec));
       const opts = shuffle([p, ...same.slice(0, 2), ...other].slice(0, 4));
       const ph = TK.photos[p.id] || [];
-      return { id: p.id, opts: opts.map((o) => o.id), seed: (Math.random() * 1e9) | 0, zoom: Math.random() < 0.6 ? 1 : 1.8, photo: ph.length && Math.random() < 0.65 ? (Math.random() * ph.length) | 0 : -1 };
+      return { id: p.id, opts: opts.map((o) => o.id), seed: (Math.random() * 1e9) | 0, zoom: Math.random() < 0.6 ? 1 : 1.8, photo: ph.length && (!hasScheme(p.id) || Math.random() < 0.65) ? (Math.random() * ph.length) | 0 : -1 };
     });
   }
   function prepQuizView(app, s) {
@@ -630,7 +675,7 @@ ${list}
 Ответ студента: """${s.answer.slice(0, 4000)}"""
 Оценивай по сути, а не по совпадению слов; фактические ошибки снижают оценку сильнее, чем неполнота. Не выдумывай того, чего нет в ответе.
 Ответь ТОЛЬКО JSON: {"score": 2-5, "verdict": "одно-два предложения с общей оценкой, обращаясь к студенту на «ты»", "good": ["что сказано верно"], "missing": ["каких важных пунктов не хватило"], "errors": ["фактические ошибки, если есть"]}`;
-      try { s.grade = await sample.json(prompt, { cache: false }); P.exams = (P.exams || 0) + 1; save(); }
+      try { s.grade = await sample.json(prompt, { cache: false, task: { kind: "grade", ref: qa[1], answer: s.answer } }); P.exams = (P.exams || 0) + 1; save(); }
       catch (e) { s.err = aiErr(e); }
       s.busy = false;
       if (view.sub === s) { drawGrade(); const b = $("#check"); if (b) b.disabled = false; if (s.err) s.err = ""; }
